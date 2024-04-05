@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.enums import ParseMode
 
-# from keyboards.set_menu import set_main_menu
+from keyboards.set_menu import set_main_menu
 from handlers import schedule_handlers
 from handlers.common_handlers import register_handlers_common
 
@@ -46,8 +46,8 @@ async def main():
     # Регистрируем все роутеры
     register_all_routers(dp)
 
-    # # Установка команд бота
-    # await set_main_menu(bot)
+    # Установка команд бота
+    await set_main_menu(bot)
 
     # Запуск поллинга
     # await dp.skip_updates()  # пропуск накопившихся апдейтов (необязательно)
