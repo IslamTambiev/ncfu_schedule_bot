@@ -27,6 +27,7 @@ headers = {
 }
 
 
+# Получение расписания
 def get_group_schedule(group_id: int, date: str):
     url = base_url + "/schedule/GetSchedule"
     data = {'date': date + "T00:00:00.000Z", 'Id': group_id, 'targetType': 2}
@@ -34,6 +35,7 @@ def get_group_schedule(group_id: int, date: str):
     return response.json()
 
 
+# Получение id группы
 def get_group_id(group_name: str) -> int:
     url = base_url + f"/schedule/search"
     params = {
@@ -45,6 +47,7 @@ def get_group_id(group_name: str) -> int:
     return 0
 
 
+# Форматирование расписания
 def format_schedule_for_day(day_data):
     date = day_data['Date']
     weekday = day_data['WeekDay']
