@@ -1,5 +1,12 @@
 import pprint
+from datetime import datetime
+import locale
 import requests
+
+locale.setlocale(
+    category=locale.LC_ALL,
+    locale="Russian"  # Note: do not use "de_DE" as it doesn't work
+)
 
 base_url = 'https://ecampus.ncfu.ru'
 
@@ -49,11 +56,11 @@ def get_group_id(group_name: str) -> int:
 
 # Форматирование расписания
 def format_schedule_for_day(day_data):
-    date = day_data['Date']
+    date_data = day_data['Date']
     weekday = day_data['WeekDay']
     lessons = day_data['Lessons']
 
-    response = f"{weekday}, {date}:"
+    response = f"{weekday}, {format_time_day_of_month(date_data)}:"
 
     for lesson in lessons:
         response += f"""\n
@@ -63,9 +70,17 @@ def format_schedule_for_day(day_data):
 Тип занятия: {lesson['LessonType']}
 Подгруппа: {lesson['Groups'][0]['Subgroup']}
 Преподаватель: {lesson['Teacher']['Name']}
-Время: с {lesson['TimeBegin']} до {lesson['TimeEnd']}"""
+Время: с {format_time(lesson['TimeBegin'])} до {format_time(lesson['TimeEnd'])}"""
 
     return response
+
+
+def format_time(time):
+    return datetime.fromisoformat(time + '.000+00:00').strftime('%H:%M')
+
+
+def format_time_day_of_month(time):
+    return datetime.fromisoformat(time + '.000+00:00').strftime('%d %B')
 
 
 group = "кмб-с-о-19-1"
@@ -73,4 +88,3 @@ date = "2024-04-08"
 # print(id := get_group_id(group))
 # print(schedule := get_group_schedule(id, date))
 # print(format_schedule_for_day(schedule[0]))
-
