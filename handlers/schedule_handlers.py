@@ -1,10 +1,13 @@
 import re
+from datetime import date
 
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message
+
+from app.schedule_parser import get_group_id, get_group_schedule, format_schedule_for_day
 
 router = Router()
 
@@ -24,7 +27,17 @@ async def handle_text_message(message: Message, state: FSMContext) -> None:
     pattern = message.text
     # Проверка соответствия строки шаблону
     if is_valid_pattern(pattern):
-        await message.reply(f"Ваш шаблон '{pattern}' принят.")
+        group_id = get_group_id(pattern)
+        if group_id == 0:
+            await message.reply("Группа не найдена.")
+            return
+        await message.reply(f"Ваш шаблон '{pattern}' принят. Вот расписание:")
+        today = date.today()
+        group_schedule = get_group_schedule(group_id, today.strftime("%Y-%m-%d"))
+        print(today.strftime("%Y-%m-%d"))
+        formated_group_schedule = format_schedule_for_day(group_schedule[0])
+        await message.answer(formated_group_schedule)
+
         # Сброс состояния
         await state.clear()
     else:

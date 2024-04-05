@@ -45,7 +45,29 @@ def get_group_id(group_name: str) -> int:
     return 0
 
 
+def format_schedule_for_day(day_data):
+    date = day_data['Date']
+    weekday = day_data['WeekDay']
+    lessons = day_data['Lessons']
+
+    response = f"{weekday}, {date}:"
+
+    for lesson in lessons:
+        response += f"""\n
+{lesson['PairNumberStart']} {lesson['LessonName']}
+Дисциплина: {lesson['Discipline']}
+Аудитория: {lesson['Aud']['Name']}
+Тип занятия: {lesson['LessonType']}
+Подгруппа: {lesson['Groups'][0]['Subgroup']}
+Преподаватель: {lesson['Teacher']['Name']}
+Время: с {lesson['TimeBegin']} до {lesson['TimeEnd']}"""
+
+    return response
+
+
 group = "кмб-с-о-19-1"
 date = "2024-04-08"
-print(id := get_group_id(group))
-print(get_group_schedule(id, date))
+# print(id := get_group_id(group))
+# print(schedule := get_group_schedule(id, date))
+# print(format_schedule_for_day(schedule[0]))
+
