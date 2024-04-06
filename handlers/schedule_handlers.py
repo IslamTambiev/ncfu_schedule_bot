@@ -1,15 +1,20 @@
 from datetime import date
 
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
+from keyboards.pagination_kb import create_pagination_keyboard
 from services.patterns import is_valid_group_name_pattern
 from services.schedule_parser import get_group_id, get_group_schedule, format_schedule_for_day
 
 router = Router()
+
+page_num = 1
+pages_len = 1
+schedule_pages = []
 
 
 class Form(StatesGroup):
@@ -18,7 +23,7 @@ class Form(StatesGroup):
 
 @router.message(Command('schedule'))
 async def start(message: Message, state: FSMContext) -> None:
-    await message.answer("Отправьте мне номер группы:")
+    await message.answer("Отправьте мне номер группы (например: КМБ-с-о-19-1):")
     await state.set_state(Form.waiting_for_pattern)
 
 
@@ -33,15 +38,67 @@ async def handle_text_message(message: Message, state: FSMContext) -> None:
             return
         await message.reply(f"Ваш шаблон '{pattern}' принят. Вот расписание:")
         today = date.today()
-        group_schedule = get_group_schedule(group_id, today.strftime("%Y-%m-%d"))
+        global schedule_pages
+        schedule_pages = get_group_schedule(group_id, today.strftime("%Y-%m-%d"))
         print(today.strftime("%Y-%m-%d"))
-        formated_group_schedule = format_schedule_for_day(group_schedule[0])
-        await message.answer(formated_group_schedule)
+        global page_num
+        global pages_len
+        page_num = 1
+        pages_len = len(schedule_pages)
+        text = format_schedule_for_day(schedule_pages[page_num - 1])
+        print(schedule_pages)
+        await message.answer(
+            text=text,
+            reply_markup=create_pagination_keyboard(
+                'backward',
+                f'{page_num}/{pages_len}',
+                'forward'
+            )
+        )
 
         # Сброс состояния
         await state.clear()
     else:
-        await message.reply("Некорректный шаблон.")
+        await message.reply("Некорректный шаблон. Отправьте правильный")
+
+
+@router.callback_query(F.data == 'forward')
+async def process_forward_press(callback: CallbackQuery):
+    global page_num
+    if page_num < pages_len:
+        page_num += 1
+        text = format_schedule_for_day(schedule_pages[page_num - 1])
+        await callback.message.edit_text(
+            text=text,
+            reply_markup=create_pagination_keyboard(
+                'backward',
+                f'{page_num}/{pages_len}',
+                'forward'
+            )
+        )
+    await callback.answer()
+
+
+@router.callback_query(F.data == 'backward')
+async def process_backward_press(callback: CallbackQuery):
+    global page_num
+    if page_num > 1:
+        page_num -= 1
+        text = format_schedule_for_day(schedule_pages[page_num - 1])
+        await callback.message.edit_text(
+            text=text,
+            reply_markup=create_pagination_keyboard(
+                'backward',
+                f'{page_num}/{pages_len}',
+                'forward'
+            )
+        )
+    await callback.answer()
+
+
+@router.callback_query(lambda x: '/' in x.data and x.data.replace('/', '').isdigit())
+async def process_page_press(callback: CallbackQuery):
+    await callback.answer()
 
 
 @router.message()

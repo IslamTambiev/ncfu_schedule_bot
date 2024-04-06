@@ -14,6 +14,5 @@ def create_pagination_keyboard(*buttons: str) -> InlineKeyboardMarkup:
         text=BTNS[button] if button in BTNS else button,
         callback_data=button) for button in buttons]
                    )
-    print(buttons)
     # Возвращаем объект инлайн-клавиатуры
     return kb_builder.as_markup()
