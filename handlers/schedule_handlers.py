@@ -46,7 +46,6 @@ async def handle_text_message(message: Message, state: FSMContext) -> None:
         page_num = 1
         pages_len = len(schedule_pages)
         text = format_schedule_for_day(schedule_pages[page_num - 1])
-        print(schedule_pages)
         await message.answer(
             text=text,
             reply_markup=create_pagination_keyboard(

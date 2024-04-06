@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.enums import ParseMode
 
@@ -37,7 +38,7 @@ async def main():
     logger.info("Starting bot")
 
     # Объявление и инициализация объектов бота и диспетчера
-    bot = Bot(token=config.tg_bot.token, parse_mode=ParseMode.HTML)
+    bot = Bot(token=config.tg_bot.token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher(storage=MemoryStorage())
 
     # Регистрируем все хэндлеры
