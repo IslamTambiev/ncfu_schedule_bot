@@ -1,7 +1,7 @@
-import pprint
-from datetime import datetime
 import locale
 import requests
+
+from services.format_time import format_time_to_hours_and_minutes, format_time_to_day_and_month
 
 locale.setlocale(
     category=locale.LC_ALL,
@@ -60,7 +60,7 @@ def format_schedule_for_day(day_data):
     weekday = day_data['WeekDay']
     lessons = day_data['Lessons']
 
-    response = f"{weekday}, {format_time_day_of_month(date_data)}:"
+    response = f"{weekday}, {format_time_to_day_and_month(date_data)}:"
 
     for lesson in lessons:
         response += f"""\n
@@ -70,17 +70,9 @@ def format_schedule_for_day(day_data):
 Тип занятия: {lesson['LessonType']}
 Подгруппа: {lesson['Groups'][0]['Subgroup']}
 Преподаватель: {lesson['Teacher']['Name']}
-Время: с {format_time(lesson['TimeBegin'])} до {format_time(lesson['TimeEnd'])}"""
+Время: с {format_time_to_hours_and_minutes(lesson['TimeBegin'])} до {format_time_to_hours_and_minutes(lesson['TimeEnd'])}"""
 
     return response
-
-
-def format_time(time):
-    return datetime.fromisoformat(time + '.000+00:00').strftime('%H:%M')
-
-
-def format_time_day_of_month(time):
-    return datetime.fromisoformat(time + '.000+00:00').strftime('%d %B')
 
 
 group = "кмб-с-о-19-1"

@@ -1,4 +1,3 @@
-import re
 from datetime import date
 
 from aiogram import Router
@@ -7,7 +6,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message
 
-from app.schedule_parser import get_group_id, get_group_schedule, format_schedule_for_day
+from services.patterns import is_valid_group_name_pattern
+from services.schedule_parser import get_group_id, get_group_schedule, format_schedule_for_day
 
 router = Router()
 
@@ -26,7 +26,7 @@ async def start(message: Message, state: FSMContext) -> None:
 async def handle_text_message(message: Message, state: FSMContext) -> None:
     pattern = message.text
     # Проверка соответствия строки шаблону
-    if is_valid_pattern(pattern):
+    if is_valid_group_name_pattern(pattern):
         group_id = get_group_id(pattern)
         if group_id == 0:
             await message.reply("Группа не найдена.")
@@ -50,10 +50,3 @@ async def echo_handler(message: Message) -> None:
         await message.send_copy(chat_id=message.chat.id)
     except TypeError:
         await message.answer("Nice try!")
-
-
-def is_valid_pattern(pattern: str) -> bool:
-    # Паттерн для соответствия формату "aaa-a-a-11-1"
-    regex_pattern = r'^[а-яА-Я]{3}-[а-яА-Я]-[а-яА-Я]-\d{2}-\d$'
-    # Проверка соответствия строки шаблону
-    return bool(re.match(regex_pattern, pattern))
